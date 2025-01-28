@@ -42,7 +42,7 @@ export class UserRepository implements IUserRepository {
     try {
       await this.database.user.update({
         where: { id: user.id as string },
-        data: { email: user.email, name: user.name, password: user.password },
+        data: user,
       });
     } catch {
       throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);

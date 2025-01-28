@@ -1,9 +1,14 @@
-import { CanActivate, ExecutionContext, HttpStatus } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { ApiError } from '@Shared/errors';
 import { ConfigService } from '@nestjs/config';
-
+@Injectable()
 export class AuthMiddleware implements CanActivate {
   constructor(
     private readonly jwt: JwtService,
@@ -19,7 +24,8 @@ export class AuthMiddleware implements CanActivate {
         secret: this.env.get<string>('JWT_SECRET'),
       });
       request['user'] = payload;
-    } catch {
+    } catch (error) {
+      console.log(error);
       throw new ApiError(HttpStatus.UNAUTHORIZED, 'Usuario nao autorizado ');
     }
     return true;

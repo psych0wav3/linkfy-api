@@ -25,10 +25,10 @@ export class UserController {
     return this.userService.executeCreateUser(user);
   }
 
-  @Patch()
+  @Patch(':id')
   @HttpCode(200)
-  async updateUser(@Body() user: UpdateUserDto) {
-    return this.userService.executeUpdateUser(user);
+  async updateUser(@Body() user: UpdateUserDto, @Param('id') id: string) {
+    return this.userService.executeUpdateUser(user, id);
   }
 
   @ApiParam({

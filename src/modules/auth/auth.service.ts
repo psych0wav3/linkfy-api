@@ -13,11 +13,10 @@ import {
   RefreshTokenRepository,
   UserRepository,
 } from '@Infra/database/repositories';
-
-//TODO: criar as interfaces da service
+import { IAuthService } from './interfaces';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements IAuthService {
   constructor(
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
     private readonly refreshRepository: RefreshTokenRepository,
@@ -26,7 +25,10 @@ export class AuthService {
     private readonly jwt: JwtService,
   ) {}
 
-  public async executeCreateLogin(email: string, password: string) {
+  public async executeCreateLogin(
+    email: string,
+    password: string,
+  ): Promise<{ access_token: string; refresh_token: string }> {
     try {
       const isCached = await this.cache.get(`session:${email}`);
       if (!isCached) {
@@ -58,7 +60,7 @@ export class AuthService {
           }
         }
       } else {
-        return isCached;
+        return isCached as { access_token: string; refresh_token: string };
       }
     } catch (error) {
       if (error instanceof UnauthorizedException) {
