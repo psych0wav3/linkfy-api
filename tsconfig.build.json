@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "paths": {
+      "@Modules/*": ["src/modules/*"],
+      "@Shared/*": ["src/shared/*"],
+      "@Infra/*": ["src/infra/*"],
+    }
+  }
+}
