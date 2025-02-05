@@ -6,4 +6,6 @@ export interface IUserRepository {
   list(): Promise<User[]>;
   update(user: Prisma.UserUpdateInput): Promise<void>;
   getByEmail(email: string): Promise<User>;
+  getByName(name: string): Promise<User>;
+  getById(id: string): Promise<User>;
 }

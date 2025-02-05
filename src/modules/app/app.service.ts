@@ -9,14 +9,5 @@ export class AppService {
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
     @Inject() private readonly prisma: PrismaService,
   ) {}
-  async getHello(): Promise<void> {
-    this.cache.set('sera', 'deu certo ');
-    await this.prisma.user.create({
-      data: {
-        email: 'teste@teste.com.br',
-        name: 'Geovane Silva',
-        password: '1234',
-      },
-    });
-  }
+  async getHello(): Promise<void> {}
 }

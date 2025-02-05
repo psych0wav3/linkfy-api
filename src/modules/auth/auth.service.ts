@@ -25,42 +25,34 @@ export class AuthService implements IAuthService {
     private readonly jwt: JwtService,
   ) {}
 
+  // TODO: adicionar cache em Redis
+
   public async executeCreateLogin(
     email: string,
     password: string,
   ): Promise<{ access_token: string; refresh_token: string }> {
     try {
-      const isCached = await this.cache.get(`session:${email}`);
-      if (!isCached) {
-        const user = await this.userRepository.getByEmail(email);
-        if (!user) {
-          throw 'E-mail ou senha invalidos';
-        } else {
-          const isValidPass = await this.crypt.compare(password, user.password);
-          if (isValidPass) {
-            const access_token = await this.jwt.signAsync(user);
-            const refresh_token = await this.jwt.signAsync(user, {
-              expiresIn: '7d',
-            });
-            await this.refreshRepository.create({
-              token: refresh_token,
-              userId: user.id,
-            });
-            this.cache.set(
-              `session:${user.email}`,
-              {
-                access_token,
-                refresh_token,
-              },
-              600000,
-            );
-            return { access_token, refresh_token };
-          } else {
-            throw new UnauthorizedException();
-          }
-        }
+      const user = await this.userRepository.getByEmail(email);
+      if (!user) {
+        throw 'E-mail ou senha invalidos';
       } else {
-        return isCached as { access_token: string; refresh_token: string };
+        const isValidPass = await this.crypt.compare(password, user.password);
+        if (isValidPass) {
+          delete user.password;
+          await this.refreshRepository.deleteByUserId(user.id);
+          const access_token = await this.jwt.signAsync(user);
+          const refresh_token = await this.jwt.signAsync(user, {
+            expiresIn: '7d',
+          });
+          await this.refreshRepository.create({
+            token: refresh_token,
+            userId: user.id,
+          });
+
+          return { access_token, refresh_token };
+        } else {
+          throw new UnauthorizedException();
+        }
       }
     } catch (error) {
       if (error instanceof UnauthorizedException) {
@@ -71,28 +63,33 @@ export class AuthService implements IAuthService {
   }
 
   public async executeRefreshToken(refresh_token: string) {
-    const validToken = await this.jwt.verifyAsync(refresh_token);
-    const savedToken = await this.refreshRepository.getByToken(refresh_token);
-    if (validToken || savedToken) {
-      const user = await this.userRepository.getByEmail(validToken.email);
-      delete user.password;
-      const access_token = await this.jwt.signAsync(user);
-      const refresh_token = await this.jwt.signAsync(user, {
-        expiresIn: '7d',
-      });
-      await this.refreshRepository.delete({ id: savedToken.id });
-      await this.refreshRepository.create({
-        token: refresh_token,
-        userId: user.id,
-      });
-      await this.cache.del(`session:${user.email}`);
-      await this.cache.set(
-        `session:${user.email}`,
-        { access_token, refresh_token },
-        600000,
-      );
-      return { access_token, refresh_token };
+    try {
+      const validToken = await this.jwt.verifyAsync(refresh_token);
+      if (validToken) {
+        const savedToken =
+          await this.refreshRepository.getByToken(refresh_token);
+        if (savedToken) {
+          const user = await this.userRepository.getByEmail(validToken.email);
+          if (user) {
+            delete user.password;
+            const accessToken = await this.jwt.signAsync(user);
+            const refreshToken = await this.jwt.signAsync(user, {
+              expiresIn: '7d',
+            });
+            await this.refreshRepository.delete({ id: savedToken.id });
+            await this.refreshRepository.create({
+              token: refreshToken,
+              userId: user.id,
+            });
+            return { access_token: accessToken, refresh_token: refreshToken };
+          } else throw new UnauthorizedException();
+        } else throw new UnauthorizedException();
+      } else throw new UnauthorizedException();
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw new ApiError(HttpStatus.UNAUTHORIZED, '');
+      }
+      throw new ApiError(HttpStatus.NOT_FOUND, error);
     }
-    throw new UnauthorizedException();
   }
 }

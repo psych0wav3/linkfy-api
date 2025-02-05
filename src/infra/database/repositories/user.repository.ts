@@ -38,19 +38,37 @@ export class UserRepository implements IUserRepository {
       throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
     }
   }
+
   async update(user: Prisma.UserUpdateInput): Promise<void> {
     try {
       await this.database.user.update({
         where: { id: user.id as string },
         data: user,
       });
+    } catch (error) {
+      console.log(error);
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
+    }
+  }
+
+  async getByEmail(email: string): Promise<User> {
+    try {
+      return await this.database.user.findUnique({ where: { email: email } });
     } catch {
       throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
     }
   }
-  async getByEmail(email: string): Promise<User> {
+  async getByName(name: string): Promise<User> {
     try {
-      return await this.database.user.findUnique({ where: { email: email } });
+      return await this.database.user.findFirst({ where: { name: name } });
+    } catch {
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
+    }
+  }
+
+  async getById(id: string): Promise<User> {
+    try {
+      return await this.database.user.findFirst({ where: { id: id } });
     } catch {
       throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
     }

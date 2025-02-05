@@ -23,6 +23,7 @@ export class AuthMiddleware implements CanActivate {
       const payload = await this.jwt.verifyAsync(token, {
         secret: this.env.get<string>('JWT_SECRET'),
       });
+
       request['user'] = payload;
     } catch (error) {
       console.log(error);

@@ -48,4 +48,13 @@ export class RefreshTokenRepository implements IRefreshTokenRepository {
       throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
     }
   }
+  async deleteByUserId(userId: string): Promise<void> {
+    try {
+      await this.database.refreshToken.deleteMany({
+        where: { userId: userId },
+      });
+    } catch {
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
+    }
+  }
 }
