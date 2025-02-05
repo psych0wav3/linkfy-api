@@ -38,11 +38,15 @@ export class RoleMiddleware implements CanActivate {
       where: { id: user.id },
       include: { role: true },
     });
-    if (!userWithRole || !requiredRoles.includes(userWithRole.role.name)) {
-      throw new ApiError(
-        HttpStatus.METHOD_NOT_ALLOWED,
-        'Insufficient Permission',
-      );
+
+    if (!userWithRole || !userWithRole.role) {
+      throw new ApiError(HttpStatus.UNAUTHORIZED, 'User role not found.');
+    }
+
+    const hasPermission = requiredRoles.includes(userWithRole.role.name);
+
+    if (!hasPermission) {
+      throw new ApiError(HttpStatus.FORBIDDEN, 'Insufficient Permission');
     }
     return true;
   }

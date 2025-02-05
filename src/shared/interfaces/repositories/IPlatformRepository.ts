@@ -4,4 +4,5 @@ export interface IPlatformRepository {
   errorMessage: string;
 
   fingByIdAsync(id: string): Promise<PlatformType>;
+  listAsync(): Promise<PlatformType[]>;
 }

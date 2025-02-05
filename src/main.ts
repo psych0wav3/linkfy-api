@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './modules/app/app.module';
+import { AppModule } from './modules/server/app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ApiErrorMiddleware } from '@Shared/middlewares';
 import { createDocumentFactory, validationPipeOpt } from '@Shared/config';

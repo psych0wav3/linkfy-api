@@ -8,6 +8,8 @@ import { AuthModule } from '@Modules/auth/auth.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import KeyvRedis from '@keyv/redis';
 import { AppsModule } from '@Modules/apps/apps.module';
+import { RolesModule } from '@Modules/roles/roles.module';
+import { PlatformModule } from '@Modules/platform/platform.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { AppsModule } from '@Modules/apps/apps.module';
     UserModule,
     AuthModule,
     AppsModule,
+    PlatformModule,
+    RolesModule,
     PrismaModule,
     CacheModule.register({
       isGlobal: true,

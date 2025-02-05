@@ -16,6 +16,13 @@ export class RoleRepository implements IRoleRepository {
       env.get('DATABASE_ERROR_MESSAGE') ||
       'We Sorry about that, please try latter';
   }
+  async list(): Promise<Role[]> {
+    try {
+      return await this.prisma.role.findMany();
+    } catch {
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
+    }
+  }
 
   async getById(id: string): Promise<Role> {
     try {

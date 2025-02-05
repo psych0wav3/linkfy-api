@@ -17,6 +17,13 @@ export class PlatformRepository implements IPlatformRepository {
       env.get<string>('DATABASE_ERROR_MESSAGE') ||
       'We Sorry about that, please try latter';
   }
+  async listAsync(): Promise<PlatformType[]> {
+    try {
+      return await this.prisma.platformType.findMany();
+    } catch {
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
+    }
+  }
 
   async fingByIdAsync(id: string): Promise<PlatformType> {
     try {
