@@ -17,6 +17,14 @@ export class RoleRepository implements IRoleRepository {
       'We Sorry about that, please try latter';
   }
 
+  async getById(id: string): Promise<Role> {
+    try {
+      return await this.prisma.role.findUnique({ where: { id: id } });
+    } catch {
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
+    }
+  }
+
   async getByName(name: string): Promise<Role> {
     try {
       return await this.prisma.role.findFirst({ where: { name: name } });

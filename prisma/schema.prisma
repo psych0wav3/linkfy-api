@@ -40,3 +40,24 @@ model RefreshToken {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model App {
+  id          String  @id @default(uuid())
+  name        String 
+  platformId  String  
+  packageName String? 
+  sha256      String?
+  bundleId    String?
+  teamId      String?
+  baseUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  platform PlatformType @relation(fields: [platformId], references: [id])
+}
+
+model PlatformType {
+  id   String  @id @default(uuid())
+  name String  @unique
+  apps App[]
+}

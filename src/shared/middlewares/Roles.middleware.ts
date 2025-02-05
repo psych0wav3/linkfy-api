@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators';
-import { Roles } from '../enums';
+
 import { ApiError } from '../errors';
 
 @Injectable()
@@ -18,10 +18,10 @@ export class RoleMiddleware implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredRoles = this.reflector.getAllAndOverride<Roles>(ROLES_KEY, [
-      context.getHandler(),
-      context.getClass,
-    ]);
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass],
+    );
 
     if (!requiredRoles) return true;
 

@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@prisma/client';
-import { Roles } from '@Shared/enums';
 import { IsEmail, IsString } from 'class-validator';
 
 export class CreateUserDto implements Partial<User> {
@@ -23,5 +22,5 @@ export class CreateUserDto implements Partial<User> {
   password?: string;
 
   @IsString()
-  role?: Roles;
+  roleId?: string;
 }

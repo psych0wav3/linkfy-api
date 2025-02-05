@@ -14,16 +14,12 @@ export class UserService implements IUserService {
   ) {}
 
   public async executeCreateUser(user: CreateUserDto) {
-    const { email, name, password, role: userRole } = user;
+    const { email, name, password, roleId } = user;
     const alredyHasEmail = await this.userRepository.getByEmail(email);
     const alredyHasName = await this.userRepository.getByName(name);
-    const role = await this.roleRepository.getByName(userRole);
+    const role = await this.roleRepository.getById(roleId);
 
-    if (!role)
-      throw new ApiError(
-        HttpStatus.NOT_FOUND,
-        `Role with ID ${userRole} not found!`,
-      );
+    if (!role) throw new ApiError(HttpStatus.NOT_FOUND, `Role not found!`);
 
     if (alredyHasEmail || alredyHasName) {
       throw new ApiError(

@@ -7,12 +7,14 @@ import { UserModule } from '@Modules/user/user.module';
 import { AuthModule } from '@Modules/auth/auth.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import KeyvRedis from '@keyv/redis';
+import { AppsModule } from '@Modules/apps/apps.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     UserModule,
     AuthModule,
+    AppsModule,
     PrismaModule,
     CacheModule.register({
       isGlobal: true,

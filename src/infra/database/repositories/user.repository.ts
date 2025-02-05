@@ -45,8 +45,7 @@ export class UserRepository implements IUserRepository {
         where: { id: user.id as string },
         data: user,
       });
-    } catch (error) {
-      console.log(error);
+    } catch {
       throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
     }
   }
