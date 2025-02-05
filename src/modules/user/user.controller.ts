@@ -52,7 +52,7 @@ export class UserController {
 
   @Get()
   @HttpCode(200)
-  @Roles(RolesEnum.Admin)
+  @Roles(RolesEnum.Admin, RolesEnum.Editor)
   async listUser() {
     return this.userService.executeListUsers();
   }

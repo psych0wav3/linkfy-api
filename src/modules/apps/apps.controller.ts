@@ -30,7 +30,7 @@ export class AppsController {
   }
 
   @Get()
-  @Roles(EnumRoles.Admin)
+  @Roles(EnumRoles.Admin, EnumRoles.Editor)
   async listApps() {
     return await this.appsService.executeListApps();
   }

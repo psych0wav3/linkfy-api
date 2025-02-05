@@ -13,7 +13,7 @@ export class PlatformController {
   constructor(private readonly platformService: PlatformService) {}
 
   @Get()
-  @Roles(EnumRoles.Admin)
+  @Roles(EnumRoles.Admin, EnumRoles.Editor)
   @HttpCode(200)
   public async listPlatforms() {
     return await this.platformService.executeListPlatform();
