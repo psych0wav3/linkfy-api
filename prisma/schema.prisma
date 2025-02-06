@@ -53,11 +53,44 @@ model App {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  platform PlatformType @relation(fields: [platformId], references: [id])
+  platform PlatformType @relation(fields: [platformId], references: [id], onDelete: Cascade)
+  dynamicLinks DynamicLinkApp[]
 }
 
 model PlatformType {
   id   String  @id @default(uuid())
   name String  @unique
   apps App[]
+}
+
+model Domain {
+  id          String  @id @default(uuid()) 
+  name        String  @unique 
+  scheme      String  
+  host        String 
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  links       DynamicLink[]
+}
+model DynamicLink {
+  id           String   @id @default(uuid()) 
+  domainId     String   
+  slug         String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  domain       Domain  @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  apps         DynamicLinkApp[]
+}
+
+model DynamicLinkApp {
+  id           String  @id @default(uuid()) 
+  dynamicLinkId String 
+  appId        String 
+  destination  String 
+  fallbackUrl  String?
+
+  dynamicLink  DynamicLink @relation(fields: [dynamicLinkId], references: [id], onDelete: Cascade)
+  app          App @relation(fields: [appId], references: [id], onDelete: Cascade)
 }
