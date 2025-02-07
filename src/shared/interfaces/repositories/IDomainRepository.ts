@@ -7,4 +7,6 @@ export interface IDomainRepository {
   findByIdAsync(id: string): Promise<Domain | null>;
   findByHostAsync(host: string): Promise<Domain | null>;
   findAllASync(): Promise<Domain[]>;
+  deleteAsync(id: string): Promise<void>;
+  updateAsync(data: Prisma.DomainUpdateInput): Promise<void>;
 }

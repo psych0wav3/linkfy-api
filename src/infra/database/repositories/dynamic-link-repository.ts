@@ -18,6 +18,37 @@ export class DynamicLinkRepository implements IDynamicLinkRepository {
       'We Sorry about that, please try latter';
   }
 
+  public async findByIdAsync(
+    where: Prisma.DynamicLinkWhereUniqueInput,
+  ): Promise<DynamicLink | null> {
+    try {
+      return await this.prisma.dynamicLink.findUnique({ where });
+    } catch {
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
+    }
+  }
+
+  public async deleteAsync(
+    where: Prisma.DynamicLinkWhereUniqueInput,
+  ): Promise<void> {
+    try {
+      await this.prisma.dynamicLink.delete({ where });
+    } catch {
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
+    }
+  }
+
+  public async updateAsync(data: Prisma.DynamicLinkUpdateInput): Promise<void> {
+    try {
+      await this.prisma.dynamicLink.update({
+        where: { id: data.id as string },
+        data,
+      });
+    } catch {
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
+    }
+  }
+
   public async createAsync(
     data: Prisma.DynamicLinkCreateInput,
   ): Promise<DynamicLink> {
@@ -27,13 +58,21 @@ export class DynamicLinkRepository implements IDynamicLinkRepository {
       throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
     }
   }
-  public async findBySlugAsync(slug: string): Promise<DynamicLink | null> {
+
+  public async findBySlugAsync(
+    domainId: string,
+    slug: string,
+  ): Promise<DynamicLink | null> {
     try {
-      return await this.prisma.dynamicLink.findFirst({ where: { slug } });
+      return await this.prisma.dynamicLink.findFirst({
+        where: { domain: { host: domainId }, slug },
+        include: { apps: true },
+      });
     } catch {
       throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
     }
   }
+
   public async findAllAsync(): Promise<DynamicLink[]> {
     try {
       return await this.prisma.dynamicLink.findMany();

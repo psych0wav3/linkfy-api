@@ -18,6 +18,25 @@ export class DomainRepository implements IDomainRepository {
       'We Sorry about that, please try latter';
   }
 
+  public async deleteAsync(id: string): Promise<void> {
+    try {
+      await this.prisma.domain.delete({ where: { id } });
+    } catch {
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
+    }
+  }
+
+  public async updateAsync(data: Prisma.DomainUpdateInput): Promise<void> {
+    try {
+      await this.prisma.domain.update({
+        where: { id: data.id as string },
+        data: data,
+      });
+    } catch {
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
+    }
+  }
+
   public async createAsync(data: Prisma.DomainCreateInput): Promise<Domain> {
     try {
       return await this.prisma.domain.create({ data });
@@ -25,6 +44,7 @@ export class DomainRepository implements IDomainRepository {
       throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
     }
   }
+
   public async findByIdAsync(id: string): Promise<Domain | null> {
     try {
       return await this.prisma.domain.findUnique({ where: { id } });
@@ -32,6 +52,7 @@ export class DomainRepository implements IDomainRepository {
       throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
     }
   }
+
   public async findByHostAsync(host: string): Promise<Domain | null> {
     try {
       return await this.prisma.domain.findFirst({ where: { host } });
@@ -39,6 +60,7 @@ export class DomainRepository implements IDomainRepository {
       throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
     }
   }
+
   public async findAllASync(): Promise<Domain[]> {
     try {
       return await this.prisma.domain.findMany();
