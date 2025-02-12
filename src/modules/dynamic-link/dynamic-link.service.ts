@@ -9,7 +9,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { IDynamicLinkService } from './interfaces';
 import { ApiError } from '@Shared/errors';
 
@@ -62,7 +62,11 @@ export class DynamicLinkService implements IDynamicLinkService {
     }
   }
 
-  public async executeResolveDynamicLink(request: Request, slug: string) {
+  public async executeResolveDynamicLink(
+    request: Request,
+    response: Response,
+    slug: string,
+  ) {
     const host = request.headers.host;
     const userAgent = request.headers['user-agent'];
 

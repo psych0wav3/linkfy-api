@@ -1,0 +1,60 @@
+
+name: linkfy
+services:
+  dns:
+    image: andyshinn/dnsmasq
+    container_name: dns
+    restart: always
+    network_mode: "host"
+    env_file:
+      - ../.env
+    volumes:
+      - ./dnsmasq.template.conf:/etc/dnsmasq.template.conf:ro
+      - ./entrypoint.sh:/entrypoint.sh:ro
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    cap_add:
+      - NET_ADMIN
+
+  nginx:
+    image: nginx
+    container_name: proxy
+    restart: always
+    ports:
+      - "80:80"
+    env_file:
+      - ../.env
+    volumes:
+      - ./nginx.template.conf:/etc/nginx/nginx.template.conf:ro
+      - ./entrypoint-nginx.sh:/entrypoint-nginx.sh:ro
+    entrypoint: ["/bin/sh", "/entrypoint-nginx.sh"]
+    depends_on:
+      - dns
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: linkfy
+      POSTGRES_PASSWORD: Linkfy@2025
+      POSTGRES_DB: linkfy
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

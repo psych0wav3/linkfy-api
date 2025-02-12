@@ -15,6 +15,6 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe(validationPipeOpt));
   app.useGlobalFilters(new ApiErrorMiddleware());
   SwaggerModule.setup('doc', app, () => createDocumentFactory(app));
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 }
 bootstrap();

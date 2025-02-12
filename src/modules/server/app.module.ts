@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaModule, PrismaService } from '@Infra/database/prisma';
 import { UserModule } from '@Modules/user/user.module';
 import { AuthModule } from '@Modules/auth/auth.module';
@@ -26,9 +26,13 @@ import { DynamicLinkAppModule } from '@Modules/dynamic-link-app/dynamic-link-app
     DomainModule,
     DynamicLinkModule,
     PrismaModule,
-    CacheModule.register({
+    CacheModule.registerAsync({
       isGlobal: true,
-      stores: new KeyvRedis('redis://localhost:6379'),
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        store: new KeyvRedis(configService.get<string>('REDIS_CACHE_URL')),
+      }),
     }),
   ],
   controllers: [AppController],
