@@ -3,7 +3,7 @@ import { User } from '@prisma/client';
 import { IsEmail, IsString } from 'class-validator';
 
 export class CreateUserDto implements Partial<User> {
-  @ApiProperty({ example: 'John Doe', description: 'Name os thje user' })
+  @ApiProperty({ example: 'John Doe', description: 'Name of the user' })
   @IsString()
   name?: string;
 
