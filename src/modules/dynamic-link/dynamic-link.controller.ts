@@ -40,16 +40,21 @@ export class DynamicLinkController {
     return this.dynamicLinkService.executeDeleteDynamicLink(id);
   }
 
-  @Get(':slug')
+  @Get()
   async resolveDynamicLink(
     @Param('slug') slug: string,
     @Req() request: Request,
     @Res() response: Response,
   ) {
-    return this.dynamicLinkService.executeResolveDynamicLink(
-      request,
-      response,
-      slug,
+    console.log(
+      'bateu aki',
+      request.headers['host'],
+      request.headers['user-agent'],
     );
+    // return this.dynamicLinkService.executeResolveDynamicLink(
+    //   request,
+    //   response,
+    //   slug,
+    // );
   }
 }

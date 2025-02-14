@@ -1,20 +1,6 @@
 
 name: linkfy
 services:
-  dns:
-    image: andyshinn/dnsmasq
-    container_name: dns
-    restart: always
-    network_mode: "host"
-    env_file:
-      - ../.env
-    volumes:
-      - ./dnsmasq.template.conf:/etc/dnsmasq.template.conf:ro
-      - ./entrypoint.sh:/entrypoint.sh:ro
-    entrypoint: ["/bin/sh", "/entrypoint.sh"]
-    cap_add:
-      - NET_ADMIN
-
   nginx:
     image: nginx
     container_name: proxy
@@ -27,8 +13,6 @@ services:
       - ./nginx.template.conf:/etc/nginx/nginx.template.conf:ro
       - ./entrypoint-nginx.sh:/entrypoint-nginx.sh:ro
     entrypoint: ["/bin/sh", "/entrypoint-nginx.sh"]
-    depends_on:
-      - dns
 
   postgres:
     image: postgres:15
