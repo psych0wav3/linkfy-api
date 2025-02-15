@@ -59,14 +59,13 @@ export class DynamicLinkRepository implements IDynamicLinkRepository {
     }
   }
 
-  public async findBySlugAsync(
-    domainId: string,
-    slug: string,
-  ): Promise<DynamicLink | null> {
+  public async findBySlugAsync(domain: string, slug: string) {
     try {
       return await this.prisma.dynamicLink.findFirst({
-        where: { domain: { host: domainId }, slug },
-        include: { apps: true },
+        where: { slug, domain: { host: domain } },
+        include: {
+          apps: { include: { app: { include: { platform: true } } } },
+        },
       });
     } catch {
       throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);

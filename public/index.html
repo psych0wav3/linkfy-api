@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecionando...</title>
+    <style>
+        /* Estilos Gerais */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f8f9fa; /* Cor clara para fundo */
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        /* Spinner de carregamento */
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            border-top-color: #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Botão */
+        .button {
+            display: inline-block;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 15px;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const destination = "{destination}";
+            const fallbackUrl = "{fallbackUrl}";
+            const manualRedirectBtn = document.getElementById("manualRedirect");
+
+            if (destination) {
+                setTimeout(() => {
+                    window.location.href = destination;
+                }, 1000); // Pequeno atraso para experiência melhor
+
+                // Se após 3 segundos a aba ainda estiver ativa, redireciona para o fallback
+                setTimeout(() => {
+                    if (document.visibilityState === 'visible') {
+                        window.location.href = fallbackUrl || "https://default-fallback.com";
+                    }
+                }, 3000);
+            } else {
+                window.location.href = fallbackUrl || "https://default-fallback.com";
+            }
+
+            // Se a navegação falhar, mostrar botão de redirecionamento manual
+            setTimeout(() => {
+                manualRedirectBtn.classList.remove("hidden");
+            }, 3500);
+        });
+    </script>
+</head>
+<body>
+    <h1>Redirecionando...</h1>
+    <p>Aguarde enquanto te levamos ao destino.</p>
+    <div class="loading-spinner"></div>
+    <p>Se nada acontecer, clique no botão abaixo:</p>
+    
+    <a id="manualRedirect" class="button hidden" href="{destination}">Tentar novamente</a>
+</body>
+</html>

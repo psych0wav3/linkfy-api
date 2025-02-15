@@ -40,21 +40,19 @@ export class DynamicLinkController {
     return this.dynamicLinkService.executeDeleteDynamicLink(id);
   }
 
-  @Get()
+  @Get(':slug')
   async resolveDynamicLink(
-    @Param('slug') slug: string,
     @Req() request: Request,
+    @Param('slug') slug: string,
     @Res() response: Response,
   ) {
-    console.log(
-      'bateu aki',
-      request.headers['host'],
-      request.headers['user-agent'],
-    );
-    // return this.dynamicLinkService.executeResolveDynamicLink(
-    //   request,
-    //   response,
-    //   slug,
-    // );
+    const data = {
+      host: request?.headers['host'] || '',
+      userAgent: request?.headers['user-agent'] || '',
+      slug,
+      send: (html: string) => response.type('html').send(html),
+    };
+
+    return await this.dynamicLinkService.executeResolveDynamicLink(data);
   }
 }

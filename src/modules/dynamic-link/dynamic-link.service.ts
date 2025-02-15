@@ -1,5 +1,4 @@
 import {
-  AppRepository,
   DynamicLinkAppRepository,
   DynamicLinkRepository,
 } from '@Infra/database/repositories';
@@ -9,16 +8,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
 import { IDynamicLinkService } from './interfaces';
 import { ApiError } from '@Shared/errors';
-
+import { resolveDynamicLinkDto } from './dtos';
+import { join } from 'path';
+import { readFileSync } from 'fs';
 @Injectable()
 export class DynamicLinkService implements IDynamicLinkService {
   constructor(
     private readonly dynamicLinkRepository: DynamicLinkRepository,
     private readonly dynamicLinkAppRepository: DynamicLinkAppRepository,
-    private readonly appRepository: AppRepository,
   ) {}
 
   public async executeDeleteDynamicLink(id: string): Promise<void> {
@@ -62,13 +61,10 @@ export class DynamicLinkService implements IDynamicLinkService {
     }
   }
 
-  public async executeResolveDynamicLink(
-    request: Request,
-    response: Response,
-    slug: string,
-  ) {
-    const host = request.headers.host;
-    const userAgent = request.headers['user-agent'];
+  public async executeResolveDynamicLink(data: resolveDynamicLinkDto) {
+    const { host, slug, send, userAgent } = data;
+
+    const userPlatform = this.getUserPlatform(userAgent);
 
     const dynamicLink = await this.dynamicLinkRepository.findBySlugAsync(
       host,
@@ -78,14 +74,25 @@ export class DynamicLinkService implements IDynamicLinkService {
     if (!dynamicLink) {
       throw new NotFoundException('Dynamic link not found');
     }
-    return '';
 
-    // let platform = 'WEB';
-    // if (/Android/i.test(userAgent)) platform = 'ANDROID';
-    // if (/iPhone|iPad|iPod/i.test(userAgent)) platform = 'IOS';
+    const { destination, fallbackUrl } = dynamicLink.apps.find(
+      (app) => app.app.platform.name === userPlatform,
+    );
 
-    //const linkForPlatform = dynamicLink.
+    const filePath = join(process.cwd(), 'public', 'index.html');
+    let htmlContent = readFileSync(filePath, 'utf8');
 
-    //return linkForPlatform.
+    htmlContent = htmlContent.replace('{destination}', destination);
+    htmlContent = htmlContent.replace('{fallbackUrl}', fallbackUrl);
+    htmlContent = htmlContent.replace('{platform}', userPlatform);
+
+    send(htmlContent);
+  }
+
+  private getUserPlatform(userAgent: string) {
+    let platform = 'WEB';
+    if (/Android/i.test(userAgent)) platform = 'ANDROID';
+    if (/iPhone|iPad|iPod/i.test(userAgent)) platform = 'IOS';
+    return platform;
   }
 }

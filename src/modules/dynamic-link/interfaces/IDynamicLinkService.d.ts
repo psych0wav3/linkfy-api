@@ -1,12 +1,12 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { resolveDynamicLinkDto } from '../dtos';
 
 export interface IDynamicLinkService {
   executeCreateDynamicLink(data): Promise<void>;
   executeResolveDynamicLink(
-    request: Request,
+    data: resolveDynamicLinkDto,
     response: Response,
-    slug: string,
-  ): Promise<string>;
+  ): Promise<void>;
   executeDeleteDynamicLink(id: string): Promise<void>;
   executeUpdateDynamicLink(data, id: string): Promise<void>;
 }

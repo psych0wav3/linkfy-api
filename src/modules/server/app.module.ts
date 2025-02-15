@@ -12,7 +12,6 @@ import { RolesModule } from '@Modules/roles/roles.module';
 import { PlatformModule } from '@Modules/platform/platform.module';
 import { DomainModule } from '@Modules/domain/domain.module';
 import { DynamicLinkModule } from '@Modules/dynamic-link/dynamic-link.module';
-import { DynamicLinkAppModule } from '@Modules/dynamic-link-app/dynamic-link-app.module';
 
 @Module({
   imports: [
@@ -22,7 +21,6 @@ import { DynamicLinkAppModule } from '@Modules/dynamic-link-app/dynamic-link-app
     AppsModule,
     PlatformModule,
     RolesModule,
-    DynamicLinkAppModule,
     DomainModule,
     DynamicLinkModule,
     PrismaModule,
