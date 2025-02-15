@@ -19,19 +19,19 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #f8f9fa; /* Cor clara para fundo */
+            background-color: #f8f9fa;
             color: #333;
             text-align: center;
             padding: 20px;
         }
 
         h1 {
-            font-size: 2rem;
+            font-size: 1.8rem;
             margin-bottom: 10px;
         }
 
         p {
-            font-size: 1.1rem;
+            font-size: 1rem;
             margin-bottom: 10px;
             color: #555;
         }
@@ -44,7 +44,7 @@
             border-top-color: #007bff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin: 15px auto;
         }
 
         @keyframes spin {
@@ -52,11 +52,24 @@
             100% { transform: rotate(360deg); }
         }
 
-        .hidden {
-            display: none;
+        /* Barra de Progresso */
+        .progress-bar-container {
+            width: 100%;
+            max-width: 300px;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
         }
 
-        /* Botão */
+        .progress-bar {
+            height: 5px;
+            width: 0;
+            background-color: #007bff;
+            transition: width 1.5s ease-in-out;
+        }
+
+        /* Estilo do Botão */
         .button {
             display: inline-block;
             padding: 12px 20px;
@@ -75,24 +88,48 @@
         .button:hover {
             background-color: #0056b3;
         }
+
+        /* Mensagem de erro */
+        .error-message {
+            color: red;
+            font-size: 1rem;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const destination = "{destination}";
             const fallbackUrl = "{fallbackUrl}";
             const manualRedirectBtn = document.getElementById("manualRedirect");
+            const errorMessage = document.getElementById("errorMessage");
+            const progressBar = document.querySelector(".progress-bar");
+
+            let navigated = false;
+
+            // Inicia a animação da barra de progresso
+            setTimeout(() => {
+                progressBar.style.width = "100%";
+            }, 100);
+
+            // Define um timeout para fallback em 1.5s
+            const fallbackTimeout = setTimeout(() => {
+                if (!navigated && document.visibilityState === 'visible') {
+                    window.location.href = fallbackUrl || "https://default-fallback.com";
+                }
+            }, 1500);
 
             if (destination) {
-                setTimeout(() => {
-                    window.location.href = destination;
-                }, 1000); // Pequeno atraso para experiência melhor
-
-                // Se após 3 segundos a aba ainda estiver ativa, redireciona para o fallback
-                setTimeout(() => {
-                    if (document.visibilityState === 'visible') {
-                        window.location.href = fallbackUrl || "https://default-fallback.com";
-                    }
-                }, 3000);
+                // Se o destino carregar, cancela o fallback
+                window.location.href = destination;
+                window.onbeforeunload = function () {
+                    navigated = true;
+                    clearTimeout(fallbackTimeout);
+                };
             } else {
                 window.location.href = fallbackUrl || "https://default-fallback.com";
             }
@@ -100,15 +137,26 @@
             // Se a navegação falhar, mostrar botão de redirecionamento manual
             setTimeout(() => {
                 manualRedirectBtn.classList.remove("hidden");
-            }, 3500);
+                errorMessage.style.display = "block";
+            }, 2000);
         });
     </script>
 </head>
 <body>
     <h1>Redirecionando...</h1>
     <p>Aguarde enquanto te levamos ao destino.</p>
+
+    <!-- Indicador de carregamento -->
     <div class="loading-spinner"></div>
+    
+    <!-- Barra de Progresso -->
+    <div class="progress-bar-container">
+        <div class="progress-bar"></div>
+    </div>
+
     <p>Se nada acontecer, clique no botão abaixo:</p>
+
+    <p id="errorMessage" class="error-message hidden">O redirecionamento falhou. Tente manualmente.</p>
     
     <a id="manualRedirect" class="button hidden" href="{destination}">Tentar novamente</a>
 </body>

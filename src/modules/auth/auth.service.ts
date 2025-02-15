@@ -25,35 +25,44 @@ export class AuthService implements IAuthService {
     private readonly jwt: JwtService,
   ) {}
 
-  // TODO: adicionar cache em Redis
-
   public async executeCreateLogin(
     email: string,
     password: string,
-  ): Promise<{ access_token: string; refresh_token: string }> {
+  ): Promise<any> {
     try {
+      const cacheKey = `auth:${email}`;
+
+      const cachedTokens = await this.cache.get(cacheKey);
+
+      if (cachedTokens) {
+        return cachedTokens;
+      }
+
       const user = await this.userRepository.getByEmail(email);
       if (!user) {
-        throw 'E-mail ou senha invalidos';
-      } else {
-        const isValidPass = await this.crypt.compare(password, user.password);
-        if (isValidPass) {
-          delete user.password;
-          await this.refreshRepository.deleteByUserId(user.id);
-          const access_token = await this.jwt.signAsync(user);
-          const refresh_token = await this.jwt.signAsync(user, {
-            expiresIn: '7d',
-          });
-          await this.refreshRepository.create({
-            token: refresh_token,
-            userId: user.id,
-          });
-
-          return { access_token, refresh_token };
-        } else {
-          throw new UnauthorizedException();
-        }
+        throw 'E-mail ou senha inválidos';
       }
+
+      const isValidPass = await this.crypt.compare(password, user.password);
+      if (!isValidPass) {
+        throw new UnauthorizedException();
+      }
+
+      delete user.password;
+      await this.refreshRepository.deleteByUserId(user.id);
+
+      const access_token = await this.jwt.signAsync(user);
+      const refresh_token = await this.jwt.signAsync(user, { expiresIn: '7d' });
+
+      await this.refreshRepository.create({
+        token: refresh_token,
+        userId: user.id,
+      });
+
+      const tokenData = { access_token, refresh_token };
+
+      await this.cache.set(cacheKey, tokenData, 3600000);
+      return tokenData;
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         throw new ApiError(HttpStatus.UNAUTHORIZED, '');
@@ -65,26 +74,50 @@ export class AuthService implements IAuthService {
   public async executeRefreshToken(refresh_token: string) {
     try {
       const validToken = await this.jwt.verifyAsync(refresh_token);
-      if (validToken) {
-        const savedToken =
-          await this.refreshRepository.getByToken(refresh_token);
-        if (savedToken) {
-          const user = await this.userRepository.getByEmail(validToken.email);
-          if (user) {
-            delete user.password;
-            const accessToken = await this.jwt.signAsync(user);
-            const refreshToken = await this.jwt.signAsync(user, {
-              expiresIn: '7d',
-            });
-            await this.refreshRepository.delete({ id: savedToken.id });
-            await this.refreshRepository.create({
-              token: refreshToken,
-              userId: user.id,
-            });
-            return { access_token: accessToken, refresh_token: refreshToken };
-          } else throw new UnauthorizedException();
-        } else throw new UnauthorizedException();
-      } else throw new UnauthorizedException();
+      if (!validToken) {
+        throw new UnauthorizedException();
+      }
+
+      const savedToken = await this.refreshRepository.getByToken(refresh_token);
+      if (!savedToken) {
+        throw new UnauthorizedException();
+      }
+
+      const cacheKey = `auth:${validToken.email}`;
+
+      const cachedTokens = await this.cache.get<{
+        access_token: string;
+        refresh_token: string;
+      }>(cacheKey);
+      if (cachedTokens) {
+        return cachedTokens;
+      }
+
+      const user = await this.userRepository.getByEmail(validToken.email);
+      if (!user) {
+        throw new UnauthorizedException();
+      }
+
+      delete user.password;
+
+      const accessToken = await this.jwt.signAsync(user);
+      const refreshToken = await this.jwt.signAsync(user, { expiresIn: '7d' });
+
+      await this.refreshRepository.delete({ id: savedToken.id });
+      await this.refreshRepository.create({
+        token: refreshToken,
+        userId: user.id,
+      });
+
+      const tokenData = {
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      };
+
+      await this.cache.set(cacheKey, tokenData, 3600000);
+      console.log(await this.cache.get(cacheKey));
+
+      return tokenData;
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         throw new ApiError(HttpStatus.UNAUTHORIZED, '');
