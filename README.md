@@ -105,4 +105,4 @@ sequenceDiagram
     Redis-->>Browser: Redirect
     Browser-->>User: Open link in app or fallback
 
-Obs: Open in Mermaid Viwer 
+![MermaidDiagram](https://www.mermaidchart.com/raw/55d99ec3-06d2-4f16-adac-cacae73509f5?theme=light&version=v0.1&format=svg)
