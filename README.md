@@ -68,7 +68,7 @@ To complete the setup for testing via your mobile device, follow these steps:
 3. Remove all existing DNS IP addresses.
 4. Add the IP address of your development machine.
 5. Save the settings and test by accessing:
-   http://link.dotz.com.br
+   http://link.linkfy.com.br
 
 Note:
 While your mobile device uses your machine's IP as DNS, the internet will be unavailable on that device. After testing, forget the network and reconnect to automatically retrieve the correct DNS settings.

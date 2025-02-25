@@ -5,7 +5,6 @@ import inquirer from 'inquirer';
 import fs from 'fs';
 import chalk from 'chalk';
 import ora from 'ora';
-import cliProgress from 'cli-progress';
 import sudo from 'sudo-prompt';
 
 function execSudo(command) {
@@ -37,7 +36,7 @@ function runCommand(command, options = {}) {
 }
 
 async function checkHomebrew() {
-  const spinner = ora(`${chalk.blue('Checking for Homebrew...')} 🧐`).start();
+  const spinner = ora(`${chalk.blue('Checking for Homebrew...')}`).start();
   try {
     await runCommand('command -v brew');
     spinner.succeed(`${chalk.green('Homebrew is installed!')} ✅`);
@@ -50,19 +49,21 @@ async function checkHomebrew() {
 }
 
 async function checkDnsmasqInstalled() {
-  const spinner = ora(`${chalk.blue('Checking for dnsmasq installation...')} 🔍`).start();
+  const spinner = ora(
+    `${chalk.blue('Checking for dnsmasq installation...')}`,
+  ).start();
   try {
     await runCommand('brew ls --versions dnsmasq');
-    spinner.succeed(`${chalk.green('dnsmasq is installed!')} ✅`);
+    spinner.succeed(`${chalk.green('dnsmasq is installed!')}`);
     return true;
   } catch {
-    spinner.info(`${chalk.yellow('dnsmasq is not installed.')} 😞`);
+    spinner.info(`${chalk.yellow('dnsmasq is not installed.')}`);
     return false;
   }
 }
 
 async function installDnsmasq() {
-  const spinner = ora(`${chalk.blue('Installing dnsmasq...')} 🚀`).start();
+  const spinner = ora(`${chalk.blue('Installing dnsmasq...')}`).start();
   try {
     await runCommand('brew install dnsmasq');
     spinner.succeed(`${chalk.green('dnsmasq installed successfully!')} ✅`);
@@ -73,7 +74,9 @@ async function installDnsmasq() {
 }
 
 async function getIPAddress(interfaceName) {
-  const spinner = ora(`${chalk.blue(`Obtaining IP address from ${interfaceName}...`)} 📡`).start();
+  const spinner = ora(
+    `${chalk.blue(`Obtaining IP address from ${interfaceName}...`)}`,
+  ).start();
   try {
     const { stdout } = await runCommand(`ipconfig getifaddr ${interfaceName}`);
     const ip = stdout.trim();
@@ -81,14 +84,18 @@ async function getIPAddress(interfaceName) {
     spinner.succeed(`${chalk.green(`IP address obtained: ${ip}`)} 🎉`);
     return ip;
   } catch {
-    spinner.fail(`${chalk.red(`Could not obtain IP address from interface ${interfaceName}.`)} ❌`);
+    spinner.fail(
+      `${chalk.red(`Could not obtain IP address from interface ${interfaceName}.`)} ❌`,
+    );
     process.exit(1);
   }
 }
 
 async function updateDnsmasqConfig(domain, ip) {
   const confPath = '/usr/local/etc/dnsmasq.conf';
-  console.log(chalk.blue(`\nUpdating dnsmasq configuration for ${domain}... 🛠️`));
+  console.log(
+    chalk.blue(`\nUpdating dnsmasq configuration for ${domain}... 🛠️`),
+  );
   if (!fs.existsSync(confPath)) {
     console.log(chalk.yellow(`${confPath} not found. Creating new file...`));
     try {
@@ -111,7 +118,9 @@ async function updateDnsmasqConfig(domain, ip) {
 }
 
 async function restartDnsmasq() {
-  const spinner = ora(`${chalk.blue('Restarting dnsmasq service...')} 🔄`).start();
+  const spinner = ora(
+    `${chalk.blue('Restarting dnsmasq service...')} 🔄`,
+  ).start();
   try {
     process.chdir(process.env.HOME || '/tmp');
     await runCommand('pgrep -x dnsmasq');
@@ -130,7 +139,9 @@ async function restartDnsmasq() {
 }
 
 async function main() {
-  console.log(chalk.magenta.bold('\nStarting DNS configuration script... 🚀\n'));
+  console.log(
+    chalk.magenta.bold('\nStarting DNS configuration script... 🚀\n'),
+  );
 
   await checkHomebrew();
   let isDnsmasqInstalled = await checkDnsmasqInstalled();
@@ -139,7 +150,9 @@ async function main() {
       {
         type: 'confirm',
         name: 'install',
-        message: chalk.yellow('dnsmasq is not installed. Would you like to install it?'),
+        message: chalk.yellow(
+          'dnsmasq is not installed. Would you like to install it?',
+        ),
         default: true,
       },
     ]);
@@ -162,7 +175,7 @@ async function main() {
       type: 'input',
       name: 'domain',
       message: 'Enter the domain to configure:',
-      default: 'link.dotz.com.br',
+      default: 'link.linkfy.com.br',
     },
   ]);
 
@@ -172,7 +185,9 @@ async function main() {
 
   await updateDnsmasqConfig(domain, ip);
   await restartDnsmasq();
-  console.log(chalk.magenta.bold('\nDNS configuration completed successfully. 🎉\n'));
+  console.log(
+    chalk.magenta.bold('\nDNS configuration completed successfully. 🎉\n'),
+  );
 }
 
 main();

@@ -5,13 +5,13 @@ const domains = [
     id: '5524e581-b933-4fba-a9c0-2237b27648cf',
     name: 'Dev',
     scheme: 'https',
-    host: 'uat.dotz.com.br',
+    host: 'hml.linkfy.com.br',
   },
   {
     id: '69f8e538-b746-4f1c-bb6e-6492e193d9e8',
     name: 'Prod',
     scheme: 'https',
-    host: 'dotz.com.br',
+    host: 'linkfy.com.br',
   },
 ];
 
