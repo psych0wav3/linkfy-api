@@ -72,9 +72,14 @@ export class DynamicLinkRepository implements IDynamicLinkRepository {
     }
   }
 
-  public async findAllAsync(): Promise<DynamicLink[]> {
+  public async findAllAsync(): Promise<
+    Prisma.DynamicLinkGetPayload<{ include: { apps: true; domain: true } }>[]
+  > {
     try {
-      return await this.prisma.dynamicLink.findMany();
+      return await this.prisma.dynamicLink.findMany({
+        where: { isListed: true },
+        include: { apps: true, domain: true },
+      });
     } catch {
       throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
     }

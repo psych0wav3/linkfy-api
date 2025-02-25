@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { DynamicLinkApp } from '@prisma/client';
+import { DynamicLinkApp, Prisma } from '@prisma/client';
 import { IDynamicLinkAppRepository } from '@Shared/interfaces/repositories';
 import { PrismaService } from '../prisma';
 import { ConfigService } from '@nestjs/config';
@@ -17,6 +17,20 @@ export class DynamicLinkAppRepository implements IDynamicLinkAppRepository {
       env.get<string>('DATABASE_ERROR_MESSAGE') ||
       'We Sorry about that, please try latter';
   }
+
+  async updateAssociationAsync(
+    data: Prisma.DynamicLinkAppUpdateInput,
+  ): Promise<void> {
+    try {
+      await this.prisma.dynamicLinkApp.update({
+        where: { id: data.id as string },
+        data,
+      });
+    } catch {
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
+    }
+  }
+
   associateAppAsync(
     dynamicLinkId: string,
     appId: string,
@@ -31,7 +45,10 @@ export class DynamicLinkAppRepository implements IDynamicLinkAppRepository {
       throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, this.errorMessage);
     }
   }
-  findByDinamicLinkIdAsync(dynamicLinkId: string): Promise<DynamicLinkApp[]> {
+
+  async findByDynamicLinkIdAsync(
+    dynamicLinkId: string,
+  ): Promise<DynamicLinkApp[]> {
     try {
       return this.prisma.dynamicLinkApp.findMany({ where: { dynamicLinkId } });
     } catch {

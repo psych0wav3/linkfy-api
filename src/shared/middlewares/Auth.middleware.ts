@@ -8,13 +8,24 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { ApiError } from '@Shared/errors';
 import { ConfigService } from '@nestjs/config';
+import { Reflector } from '@nestjs/core';
+import { AUTH_KEY } from '@Shared/decorators';
 @Injectable()
 export class AuthMiddleware implements CanActivate {
   constructor(
     private readonly jwt: JwtService,
     private readonly env: ConfigService,
+    private readonly reflector: Reflector,
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const bypass = this.reflector.getAllAndOverride<boolean>(AUTH_KEY, [
+      context.getHandler(),
+      context.getClass,
+    ]);
+
+    if (bypass) {
+      return true;
+    }
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token)

@@ -10,32 +10,75 @@ import {
 } from '@nestjs/common';
 import { IDynamicLinkService } from './interfaces';
 import { ApiError } from '@Shared/errors';
-import { resolveDynamicLinkDto } from './dtos';
+import {
+  CreateDynamicLinkDto,
+  ResolveDynamicLinkDto,
+  UpadateDynamicLinkDto,
+} from './dtos';
 import { join } from 'path';
 import { readFileSync } from 'fs';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from '@Infra/database/prisma';
 @Injectable()
 export class DynamicLinkService implements IDynamicLinkService {
   constructor(
     private readonly dynamicLinkRepository: DynamicLinkRepository,
     private readonly dynamicLinkAppRepository: DynamicLinkAppRepository,
+    private readonly prisma: PrismaService,
   ) {}
 
-  public async executeDeleteDynamicLink(id: string): Promise<void> {
+  async executeListDynamicLink(): Promise<Record<string, any>> {
+    const list = await this.dynamicLinkRepository.findAllAsync();
+    return list.map((item) => {
+      const { apps } = item;
+      delete item.isListed;
+      delete item.apps;
+      return { ...item, links: apps };
+    });
+  }
+
+  public async executeDeleteDynamicLink({
+    id,
+  }: Prisma.DynamicLinkWhereUniqueInput): Promise<void> {
     const dynamicLink = await this.dynamicLinkRepository.findByIdAsync({ id });
     if (!dynamicLink)
       throw new ApiError(HttpStatus.NOT_FOUND, 'Dynamic link not found');
     await this.dynamicLinkRepository.deleteAsync({ id });
   }
 
-  public async executeUpdateDynamicLink(data: any, id: string): Promise<void> {
+  public async executeUpdateDynamicLink(
+    data: UpadateDynamicLinkDto,
+    { id }: Prisma.DynamicLinkWhereUniqueInput,
+  ): Promise<void> {
+    const { appLinks: newAppLinks, slug } = data;
     const dynamicLink = await this.dynamicLinkRepository.findByIdAsync({ id });
-    if (!dynamicLink)
+    const appLinks =
+      await this.dynamicLinkAppRepository.findByDynamicLinkIdAsync(id);
+
+    if (!dynamicLink || !appLinks)
       throw new ApiError(HttpStatus.NOT_FOUND, 'Dynamic link not found');
-    data.id = id;
-    await this.dynamicLinkRepository.updateAsync(data);
+
+    const toUpdateAppLinks = newAppLinks.map((item) => {
+      const iqual = appLinks.find((_item) => _item.appId === item.appId);
+      if (iqual) {
+        return {
+          id: iqual.id,
+          ...item,
+        };
+      }
+    });
+
+    await this.dynamicLinkRepository.updateAsync({ slug, id });
+    for (const links of toUpdateAppLinks) {
+      await this.dynamicLinkAppRepository.updateAssociationAsync(links);
+    }
   }
 
-  public async executeCreateDynamicLink(data) {
+  public async executeCreateDynamicLink(
+    data: CreateDynamicLinkDto,
+  ): Promise<
+    Prisma.DynamicLinkGetPayload<{ include: { apps: true; domain: true } }>[]
+  > {
     const existingLink = await this.dynamicLinkRepository.findBySlugAsync(
       data.domainId,
       data.slug,
@@ -49,6 +92,7 @@ export class DynamicLinkService implements IDynamicLinkService {
     const dynamicLink = await this.dynamicLinkRepository.createAsync({
       slug: data.slug,
       domain: { connect: { id: data.domainId } },
+      isListed: data.isListed,
     });
 
     for (const appLink of data.appLinks) {
@@ -59,9 +103,13 @@ export class DynamicLinkService implements IDynamicLinkService {
         appLink.fallbackUrl,
       );
     }
+    return await this.prisma.dynamicLink.findMany({
+      where: { id: dynamicLink.id },
+      include: { apps: true, domain: true },
+    });
   }
 
-  public async executeResolveDynamicLink(data: resolveDynamicLinkDto) {
+  public async executeResolveDynamicLink(data: ResolveDynamicLinkDto) {
     const { host, slug, send, userAgent } = data;
 
     const userPlatform = this.getUserPlatform(userAgent);

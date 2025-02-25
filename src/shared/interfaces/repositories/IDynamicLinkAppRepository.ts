@@ -1,4 +1,4 @@
-import { DynamicLinkApp } from '@prisma/client';
+import { DynamicLinkApp, Prisma } from '@prisma/client';
 
 export interface IDynamicLinkAppRepository {
   errorMessage: string;
@@ -10,5 +10,6 @@ export interface IDynamicLinkAppRepository {
     fallbackUrl?: string,
   ): Promise<DynamicLinkApp>;
 
-  findByDinamicLinkIdAsync(dynamicLinkId: string): Promise<DynamicLinkApp[]>;
+  findByDynamicLinkIdAsync(dynamicLinkId: string): Promise<DynamicLinkApp[]>;
+  updateAssociationAsync(data: Prisma.DynamicLinkAppUpdateInput): Promise<void>;
 }

@@ -5,7 +5,9 @@ export interface IDynamicLinkRepository {
 
   createAsync(data: Prisma.DynamicLinkCreateInput): Promise<DynamicLink>;
   findBySlugAsync(domainId: string, slug: string): Promise<DynamicLink | null>;
-  findAllAsync(): Promise<DynamicLink[]>;
+  findAllAsync(): Promise<
+    Prisma.DynamicLinkGetPayload<{ include: { apps: true; domain: true } }>[]
+  >;
   findByIdAsync(
     id: Prisma.DynamicLinkWhereUniqueInput,
   ): Promise<DynamicLink | null>;

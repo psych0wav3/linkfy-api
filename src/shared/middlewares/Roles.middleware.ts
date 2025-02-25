@@ -6,7 +6,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ROLES_KEY } from '../decorators';
+import { AUTH_KEY, ROLES_KEY } from '../decorators';
 
 import { ApiError } from '../errors';
 
@@ -23,7 +23,12 @@ export class RoleMiddleware implements CanActivate {
       [context.getHandler(), context.getClass],
     );
 
-    if (!requiredRoles) return true;
+    const bypass = this.reflector.getAllAndOverride<boolean>(AUTH_KEY, [
+      context.getHandler(),
+      context.getClass,
+    ]);
+
+    if (!requiredRoles || bypass) return true;
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;

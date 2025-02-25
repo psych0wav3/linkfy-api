@@ -79,6 +79,7 @@ model DynamicLink {
   slug         String   @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  isListed     Boolean  @default(true)
 
   domain       Domain  @relation(fields: [domainId], references: [id], onDelete: Cascade)
   apps         DynamicLinkApp[]

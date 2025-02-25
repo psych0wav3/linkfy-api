@@ -6,12 +6,14 @@ import {
   DynamicLinkAppRepository,
   DynamicLinkRepository,
 } from '@Infra/database/repositories';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   providers: [
     DynamicLinkService,
     DynamicLinkRepository,
     DynamicLinkAppRepository,
+    JwtService,
   ],
   controllers: [DynamicLinkController],
   imports: [PrismaModule],

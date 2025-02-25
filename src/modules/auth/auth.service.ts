@@ -115,7 +115,6 @@ export class AuthService implements IAuthService {
       };
 
       await this.cache.set(cacheKey, tokenData, 3600000);
-      console.log(await this.cache.get(cacheKey));
 
       return tokenData;
     } catch (error) {
