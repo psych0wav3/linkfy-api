@@ -1,6 +1,7 @@
 import {
   ConflictException,
   HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,12 +13,15 @@ import {
   PlatformRepository,
 } from '@Infra/database/repositories';
 import { ApiError } from '@Shared/errors';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class AppsService implements IAppsService {
   constructor(
     private readonly appRepository: AppRepository,
     private readonly platformRepository: PlatformRepository,
+    @Inject(CACHE_MANAGER) private readonly cache: Cache,
   ) {}
 
   public async executeCreateApp(app: CreateAppDto): Promise<void> {
@@ -33,6 +37,7 @@ export class AppsService implements IAppsService {
           ...app,
           platform: { connect: { id: platform.id } },
         });
+        await this.cache.del('listApps');
       } else {
         throw new NotFoundException('Platform not found with ID provide');
       }
@@ -53,6 +58,7 @@ export class AppsService implements IAppsService {
     if (hasApp) {
       app.id = hasApp.id;
       await this.appRepository.updateAsync(app);
+      await this.cache.del('listApps');
       return;
     }
     throw new ApiError(HttpStatus.NOT_FOUND, 'App with ID provide not found');
@@ -62,6 +68,7 @@ export class AppsService implements IAppsService {
     const app = await this.appRepository.findById(id);
     if (app) {
       await this.appRepository.deleteAsync({ id: id });
+      await this.cache.del('listApps');
       return;
     }
     throw new ApiError(HttpStatus.NOT_FOUND, 'App with ID provide not found');
