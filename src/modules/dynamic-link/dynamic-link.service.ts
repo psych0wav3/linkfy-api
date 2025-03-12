@@ -123,13 +123,9 @@ export class DynamicLinkService implements IDynamicLinkService {
       throw new NotFoundException('Dynamic link not found');
     }
 
-    console.log(userPlatform);
-
     const teste = dynamicLink.apps.find(
       (app) => app.app.platform.name === userPlatform,
     );
-
-    console.log(JSON.stringify(dynamicLink));
     const filePath = join(process.cwd(), 'public', 'index.html');
     let htmlContent = readFileSync(filePath, 'utf8');
 
